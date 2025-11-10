@@ -3,6 +3,7 @@ import numpy as np
 from tqdm import tqdm
 from pathlib import Path
 from src.utils.commons import load_json_data
+from src.utils.interrupt_check import DelayedInterrupt
 from src.entity.config_entity import ImageExtractionSplitConfig
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -107,8 +108,9 @@ class ImageExtractionSplit:
         dest_dir.mkdir(parents=True, exist_ok=True)
 
         frames = self.frames_extraction(video_path)
-        for i, frame in enumerate(frames):
-            cv2.imwrite(dest_dir / f"{i:0>3}.{self.config.image_format}", frame.astype('uint8'))
+        with DelayedInterrupt():
+            for i, frame in enumerate(frames):
+                cv2.imwrite(dest_dir / f"{i:0>3}.{self.config.image_format}", frame.astype('uint8'))
 
     def set_label(self):
         self.video_label_dict = {}
