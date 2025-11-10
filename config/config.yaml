@@ -1,0 +1,7 @@
+downloadDataset:
+  url: https://www.kaggle.com/api/v1/datasets/download/sarthakjain004/msvd-clips
+  output_path: dataset/msvd-clips.zip
+
+unzipDataset:
+  zip_path: dataset/msvd-clips.zip
+  extract_dir: dataset/msvd-clips

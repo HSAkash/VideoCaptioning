@@ -2,6 +2,7 @@ accelerate==1.11.0
 bert-score==0.3.13
 dvc==3.59.1
 evaluate==0.4.6
+gdown
 gradio==5.28.0
 huggingface-hub==0.36.0
 ipykernel
