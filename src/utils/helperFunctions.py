@@ -16,10 +16,10 @@ def downloadDataset(config: DownloadDatasetConfig):
     # Caption download
     caption_output_dir = config.caption_output_dir
     caption_output_dir.mkdir(parents=True, exist_ok=True)
-    for caption_url in config.caption_urls:
-        output_path = caption_url.split('/')[-1].split('&')[0].split("?")[0]
-        output_path = caption_output_dir / output_path
-        gdown.download(url=caption_url, output=output_path.__str__(), resume=True)
+    for item in config.caption_urls:
+        file_name, url = item.file_name, item.url
+        output_path = caption_output_dir / file_name
+        gdown.download(url=url, output=output_path.__str__(), resume=True)
 
 def unzipDataset(config: UnzipDatasetConfig):
     extract_dir = config.extract_dir
