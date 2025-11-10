@@ -1,7 +1,16 @@
 downloadDataset:
-  url: https://www.kaggle.com/api/v1/datasets/download/sarthakjain004/msvd-clips
-  output_path: dataset/msvd-clips.zip
+  video_url: https://www.kaggle.com/api/v1/datasets/download/sarthakjain004/msvd-clips
+  caption_urls:
+    - https://huggingface.co/datasets/friedrichor/MSVD/resolve/main/msvd_train.json?download=true
+    - https://huggingface.co/datasets/friedrichor/MSVD/resolve/main/msvd_test.json?download=true
+    - https://huggingface.co/datasets/friedrichor/MSVD/resolve/main/msvd_val.json?download=true
+  video_output_path: dataset/msvd-clips.zip
+  caption_output_dir: dataset/captions
 
 unzipDataset:
   zip_path: dataset/msvd-clips.zip
   extract_dir: dataset/msvd-clips
+
+imageExtraction:
+  video_dir: dataset/msvd-clips/YouTubeClips
+  image_dir: dataset/msvd-images

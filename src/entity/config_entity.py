@@ -3,8 +3,12 @@ from dataclasses import dataclass
 
 @dataclass
 class DownloadDatasetConfig:
-    url:                                str
-    output_path:                        Path
+    video_url:                          str
+    video_output_path:                  Path
+    caption_urls:                       list[str]
+    caption_output_dir:                 Path
+
+    
 
 @dataclass
 class UnzipDatasetConfig:

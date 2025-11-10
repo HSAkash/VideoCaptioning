@@ -8,12 +8,18 @@ from src.entity.config_entity import (
 )
 
 def downloadDataset(config: DownloadDatasetConfig):
-    url = config.url
-    output_path = config.output_path
+    # Video download
+    video_output_path = config.video_output_path
+    video_output_path.parent.mkdir(parents=True, exist_ok=True)
+    gdown.download(url=config.video_url, output=video_output_path.__str__(), resume=True)
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    gdown.download(url=url, output=output_path.__str__(), resume=True)
+    # Caption download
+    caption_output_dir = config.caption_output_dir
+    caption_output_dir.mkdir(parents=True, exist_ok=True)
+    for caption_url in config.caption_urls:
+        output_path = caption_url.split('/')[-1].split('&')[0].split("?")[0]
+        output_path = caption_output_dir / output_path
+        gdown.download(url=caption_url, output=output_path.__str__(), resume=True)
 
 def unzipDataset(config: UnzipDatasetConfig):
     extract_dir = config.extract_dir
@@ -44,7 +50,7 @@ if __name__ == "__main__":
     logger.info(f">>> stage {STAGE_NAME} started")
     download_dataset_config = configurationManager.get_download_dataset_config()
     downloadDataset(download_dataset_config)
-    logger.info(f">>> stage {STAGE_NAME} completed and save it to: {download_dataset_config.output_path}")
+    logger.info(f">>> stage {STAGE_NAME} completed and save it to: {download_dataset_config.video_output_path}")
 
     # Unzip dataset
     STAGE_NAME = "Unzip dataset"

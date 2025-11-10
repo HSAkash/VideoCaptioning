@@ -10,7 +10,7 @@ class DownloadDatasetPipeline:
     def run(self):
         config = ConfigurationManager().get_download_dataset_config()
         downloadDataset(config)
-        logger.info(f">>> Save it to: {config.output_path}")
+        logger.info(f">>> Save it to: {config.video_output_path}")
 
 
 if __name__ == "__main__":

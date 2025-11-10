@@ -15,8 +15,10 @@ class ConfigurationManager:
         config = self.config.downloadDataset
         
         return DownloadDatasetConfig(
-            url = config.url,
-            output_path = here(config.output_path)
+            video_url = config.video_url,
+            video_output_path = here(config.video_output_path),
+            caption_urls = config.caption_urls,
+            caption_output_dir = here(config.caption_output_dir)
         )
     
     def get_unzip_dataset_config(self) -> UnzipDatasetConfig:
