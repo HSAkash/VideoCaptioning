@@ -1,4 +1,5 @@
 import yaml
+import json
 from src import logger
 from pathlib import Path
 from box import ConfigBox
@@ -37,6 +38,10 @@ def read_yaml(file_path: Path) -> ConfigBox:
         raise e
 
     return mime.from_file(file_path)
+
+def load_json_data(json_path):
+    with open(json_path, 'r') as f:
+        return json.load(f)
 
 
 

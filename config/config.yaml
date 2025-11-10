@@ -14,6 +14,14 @@ unzipDataset:
   zip_path: dataset/msvd-clips.zip
   extract_dir: dataset/msvd-clips
 
-imageExtraction:
-  video_dir: dataset/msvd-clips/YouTubeClips
-  image_dir: dataset/msvd-images
+imageExtractionSplit:
+  video_source_dir: dataset/msvd-clips/YouTubeClips
+  caption_details:
+    - file_path: dataset/msvd-captions/train.json
+      label: train
+    - file_path: dataset/msvd-captions/test.json
+      label: test
+    - file_path: dataset/msvd-captions/val.json
+      label: val
+  image_destination_dir: dataset/msvd-images
+  image_format: jpg

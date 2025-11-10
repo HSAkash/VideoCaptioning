@@ -10,7 +10,8 @@ ipywidgets
 loguru
 matplotlib==3.10.7
 nltk==3.9.2
-numpy==2.3.4
+numpy==2.2.6
+opencv-python==4.12.0.88
 pandas==2.3.3
 pillow==12.0.0
 pycocoevalcap==1.2
