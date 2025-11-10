@@ -1,11 +1,16 @@
-import os
 import sys
+from pathlib import Path
 from loguru import logger
 
-# Define log directory and file
-log_dir = os.path.join(os.path.dirname(__file__), "logs")
-log_file = os.path.join(log_dir, "app.log")
-os.makedirs(log_dir, exist_ok=True)
+# Define the base directory (where the current file is located)
+base_dir = Path(__file__).resolve().parent
+
+# Define log directory and log file path
+log_dir = base_dir / "logs"
+log_file = log_dir / "app.log"
+
+# Create directory if missing
+log_dir.mkdir(parents=True, exist_ok=True)
 
 # Remove default handler to avoid duplicate logs
 logger.remove()
