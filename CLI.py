@@ -3,6 +3,7 @@ from src import logger
 from src.pipeline.stage_01_download_dataset import DownloadDatasetPipeline
 from src.pipeline.stage_02_unzip_dataset import UnzipDatasetPipeline
 from src.pipeline.stage_03_ImageExtraction import ImageExtractionPipeline
+from src.pipeline.stage_04_augmentation import AugmentationPipeline
 
 @click.command()
 @click.option(
@@ -34,7 +35,8 @@ def main(
     download: bool,
     unzip: bool,
     im_ex:bool,
-    imex_resume: bool
+    imex_resume: bool,
+    augmentation: bool
 ):
     # Download dataset
     if download:
@@ -59,6 +61,14 @@ def main(
         logger.info(f">>> stage {STAGE_NAME} started")
         pipeline = ImageExtractionPipeline()
         pipeline.run(resume = not imex_resume)
+        logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    # Augmentation
+    if augmentation:
+        STAGE_NAME = "Augmentation"
+        logger.info(f">>> stage {STAGE_NAME} started")
+        pipeline = AugmentationPipeline()
+        pipeline.run()
         logger.info(f">>> stage {STAGE_NAME} completed.")
 
 if __name__ == '__main__':
