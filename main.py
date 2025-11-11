@@ -2,6 +2,7 @@ from src import logger
 from src.pipeline.stage_01_download_dataset import DownloadDatasetPipeline
 from src.pipeline.stage_02_unzip_dataset import UnzipDatasetPipeline
 from src.pipeline.stage_03_ImageExtraction import ImageExtractionPipeline
+from src.pipeline.stage_04_augmentation import AugmentationPipeline
 
 if __name__ == "__main__":
     
@@ -23,5 +24,12 @@ if __name__ == "__main__":
     STAGE_NAME = "Image Extraction"
     logger.info(f">>> stage {STAGE_NAME} started")
     pipeline = ImageExtractionPipeline()
+    pipeline.run()
+    logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    # Augmentation
+    STAGE_NAME = "Augmentation"
+    logger.info(f">>> stage {STAGE_NAME} started")
+    pipeline = AugmentationPipeline()
     pipeline.run()
     logger.info(f">>> stage {STAGE_NAME} completed.")

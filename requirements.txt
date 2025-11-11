@@ -7,6 +7,7 @@ gradio==5.28.0
 huggingface-hub==0.36.0
 ipykernel
 ipywidgets
+kornia==0.8.2
 loguru
 matplotlib==3.10.7
 nltk==3.9.2

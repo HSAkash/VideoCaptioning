@@ -6,6 +6,7 @@ from src.entity.config_entity import (
     DownloadDatasetConfig,
     UnzipDatasetConfig,
     ImageExtractionSplitConfig,
+    AugmentationConfig,
 )
 
 
@@ -39,13 +40,36 @@ class ConfigurationManager:
         
         # set MAX_WORKERS
         cpu_cores = os.cpu_count() or 1
-        MAX_WORKERS = min(self.params.MAX_WORKERS, cpu_cores) # take which one minimum
+        MAX_WORKERS = min(self.params.MAX_WORKERS, cpu_cores) or 1 # take which one minimum
         
         return ImageExtractionSplitConfig(
             video_source_dir = here(config.video_source_dir),
             caption_details = caption_details,
             image_destination_dir = here(config.image_destination_dir),
             image_format = config.image_format,
+            FRAMES_PER_VIDEO = self.params.FRAMES_PER_VIDEO,
+            IMAGE_SIZE = self.params.IMAGE_SIZE,
+            MAX_WORKERS = MAX_WORKERS
+        )
+    
+    def get_augmentation_config(self) -> AugmentationConfig:
+        config = self.config.augmentation
+        params = self.params.augmentation
+
+        source_destination_dirs = [(here(item[0]), here(item[1])) for item in config.source_destination_dirs] 
+        
+        # set MAX_WORKERS
+        cpu_cores = os.cpu_count() or 1
+        MAX_WORKERS = min(self.params.MAX_WORKERS, cpu_cores) or 1 # take which one minimum
+
+        return AugmentationConfig(
+            source_destination_dirs = source_destination_dirs,
+            image_format = config.image_format,
+            resize_crop_scale = tuple(params.resize_crop_scale),
+            horizontal_flip_p = params.horizontal_flip_p,
+            color_jitter = tuple(params.color_jitter),
+            gaussian_blur_sigma = tuple(params.gaussian_blur_sigma),
+            N = params.N,
             FRAMES_PER_VIDEO = self.params.FRAMES_PER_VIDEO,
             IMAGE_SIZE = self.params.IMAGE_SIZE,
             MAX_WORKERS = MAX_WORKERS

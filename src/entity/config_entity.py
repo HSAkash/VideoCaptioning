@@ -25,3 +25,16 @@ class ImageExtractionSplitConfig:
     IMAGE_SIZE:                         int
     MAX_WORKERS:                        int
     
+
+@dataclass
+class AugmentationConfig:
+    source_destination_dirs:            list[tuple[Path, Path]]
+    image_format:                       str
+    N:                                  int # N time augmentation
+    FRAMES_PER_VIDEO:                   int
+    IMAGE_SIZE:                         int
+    MAX_WORKERS:                        int
+    resize_crop_scale:                  tuple[float, float] = (0.9, 1.0)
+    horizontal_flip_p:                  float = 0.5
+    color_jitter:                       tuple[float, float, float, float] = (0.1, 0.1, 0.1, 0.0) # (brightness, contrast, saturation, hue)
+    gaussian_blur_sigma:                tuple[float, float] = (0.1, 1.0)

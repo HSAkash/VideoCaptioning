@@ -25,3 +25,8 @@ imageExtractionSplit:
       label: val
   image_destination_dir: dataset/msvd-images
   image_format: jpg
+
+augmentation:
+  source_destination_dirs:
+    - [dataset/msvd-images/train, dataset/msvd-images/train]
+  image_format: jpg
