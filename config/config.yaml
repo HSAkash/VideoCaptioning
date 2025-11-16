@@ -35,7 +35,7 @@ videoEncoding:
   vit_name: "google/vit-base-patch16-224-in21k"
   source_root_dir: dataset/msvd-images
   sub_folders: ['train', 'test', 'val']
-  destination_root_dir: dataset/feature_ds # dataset/feature_dataset
+  destination_root_dir: dataset/feature_dataset # dataset/feature_dataset
   image_format: jpg
 
 generateDatasetLabel:
@@ -54,8 +54,7 @@ generateDatasetLabel:
 training:
   vit_name: google/vit-base-patch16-224-in21k
   gpt2_name: gpt2
-  # train_csv: dataset/feature_dataset/train.csv
-  train_csv: dataset/feature_dataset/val.csv
+  train_csv: dataset/feature_dataset/train.csv
   val_csv: dataset/feature_dataset/val.csv
   checkpoint_dir: dataset/results/checkpoints
   checkpoint_best_dir: dataset/results/checkpoints/best
