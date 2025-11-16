@@ -52,3 +52,9 @@ class VideoEncodingConfig:
     MAX_WORKERS:                        int
     DEVICE:                             str
     SEED:                               int
+
+
+@dataclass
+class GenerateDatasetLabelConfig:
+    dataset_details:                    list[tuple[str, Path, Path]] # label, source_json_path, video_data_dir
+    destination_root_dir:               Path

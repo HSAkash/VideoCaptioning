@@ -9,6 +9,7 @@ from src.entity.config_entity import (
     ImageExtractionSplitConfig,
     AugmentationConfig,
     VideoEncodingConfig,
+    GenerateDatasetLabelConfig,
 )
 
 
@@ -96,4 +97,20 @@ class ConfigurationManager:
             MAX_WORKERS = MAX_WORKERS,
             DEVICE = DEVICE,
             SEED = self.params.SEED
+        )
+    
+    def get_generate_dataset_label_config(self) -> GenerateDatasetLabelConfig:
+        config = self.config.generateDatasetLabel
+
+        dataset_details = [
+            (
+                item.label, # label
+                here(item.source_json_path), # source_json_path
+                here(item.video_data_dir), # video_data_dir
+            )for item in config.dataset_details
+        ]
+
+        return GenerateDatasetLabelConfig(
+            dataset_details = dataset_details,
+            destination_root_dir = here(config.destination_root_dir)
         )

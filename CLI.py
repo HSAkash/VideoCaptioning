@@ -5,6 +5,7 @@ from src.pipeline.stage_02_unzip_dataset import UnzipDatasetPipeline
 from src.pipeline.stage_03_ImageExtraction import ImageExtractionPipeline
 from src.pipeline.stage_04_augmentation import AugmentationPipeline
 from src.pipeline.stage_05_videoEncoding import VideoEncodingPipeline
+from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipeline
 
 @click.command()
 @click.option(
@@ -43,6 +44,12 @@ from src.pipeline.stage_05_videoEncoding import VideoEncodingPipeline
     default=False, 
     help='Video feature extraction'
 )
+@click.option(
+    '--generate_label', 
+    is_flag=True, 
+    default=False, 
+    help='Generate Dataset label'
+)
 
 def main(
     download: bool,
@@ -50,7 +57,8 @@ def main(
     im_ex:bool,
     imex_resume: bool,
     augmentation: bool,
-    video_encoding: bool
+    video_encoding: bool,
+    generate_label: bool
 ):
     # Download dataset
     if download:
@@ -90,6 +98,14 @@ def main(
         STAGE_NAME = "Video Encoding"
         logger.info(f">>> stage {STAGE_NAME} started")
         pipeline = VideoEncodingPipeline()
+        pipeline.run()
+        logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    # Generate Dataset Label
+    if generate_label:
+        STAGE_NAME = "Generate Dataset Label"
+        logger.info(f">>> stage {STAGE_NAME} started")
+        pipeline = GenerateDatasetLabelPipeline()
         pipeline.run()
         logger.info(f">>> stage {STAGE_NAME} completed.")
 
