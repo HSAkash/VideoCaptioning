@@ -38,3 +38,17 @@ class AugmentationConfig:
     horizontal_flip_p:                  float = 0.5
     color_jitter:                       tuple[float, float, float, float] = (0.1, 0.1, 0.1, 0.0) # (brightness, contrast, saturation, hue)
     gaussian_blur_sigma:                tuple[float, float] = (0.1, 1.0)
+    
+
+@dataclass
+class VideoEncodingConfig:
+    vit_name:                           str
+    source_root_dir:                    Path
+    sub_folders:                        list[str]
+    destination_root_dir:               Path
+    image_format:                       str
+    FRAMES_PER_VIDEO:                   int
+    FRAMES_BATCH:                       int
+    MAX_WORKERS:                        int
+    DEVICE:                             str
+    SEED:                               int

@@ -4,6 +4,7 @@ from src.pipeline.stage_01_download_dataset import DownloadDatasetPipeline
 from src.pipeline.stage_02_unzip_dataset import UnzipDatasetPipeline
 from src.pipeline.stage_03_ImageExtraction import ImageExtractionPipeline
 from src.pipeline.stage_04_augmentation import AugmentationPipeline
+from src.pipeline.stage_05_videoEncoding import VideoEncodingPipeline
 
 @click.command()
 @click.option(
@@ -30,13 +31,26 @@ from src.pipeline.stage_04_augmentation import AugmentationPipeline
     default=False, 
     help='Not Resume the image extraction process. It will delete the previous images & start from the beginning'
 )
+@click.option(
+    '--augmentation', 
+    is_flag=True, 
+    default=False, 
+    help='Image Augmentation'
+)
+@click.option(
+    '--video_encoding', 
+    is_flag=True, 
+    default=False, 
+    help='Video feature extraction'
+)
 
 def main(
     download: bool,
     unzip: bool,
     im_ex:bool,
     imex_resume: bool,
-    augmentation: bool
+    augmentation: bool,
+    video_encoding: bool
 ):
     # Download dataset
     if download:
@@ -68,6 +82,14 @@ def main(
         STAGE_NAME = "Augmentation"
         logger.info(f">>> stage {STAGE_NAME} started")
         pipeline = AugmentationPipeline()
+        pipeline.run()
+        logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    # Video Encoding
+    if video_encoding:
+        STAGE_NAME = "Video Encoding"
+        logger.info(f">>> stage {STAGE_NAME} started")
+        pipeline = VideoEncodingPipeline()
         pipeline.run()
         logger.info(f">>> stage {STAGE_NAME} completed.")
 

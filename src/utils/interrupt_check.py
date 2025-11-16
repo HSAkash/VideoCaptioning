@@ -21,3 +21,23 @@ class DelayedInterrupt:
             signal.signal(signal.SIGINT, self.old_handler)
             if self.signal_received:
                 self.old_handler(*self.signal_received)
+
+
+class DelayedInterruptMainProcess:
+    def __enter__(self):
+        self.signal_received = None
+        self.old_handler = signal.getsignal(signal.SIGINT)
+        signal.signal(signal.SIGINT, self.handler)
+        return self
+
+    def handler(self, sig, frame):
+        # Store the signal — don't interrupt yet
+        self.signal_received = (sig, frame)
+        print("\nCtrl+C pressed. Will interrupt after current task...")
+
+    def __exit__(self, type, value, traceback):
+        # Restore old handler
+        signal.signal(signal.SIGINT, self.old_handler)
+        # If Ctrl+C was pressed, re-raise KeyboardInterrupt now
+        if self.signal_received:
+            self.old_handler(*self.signal_received)

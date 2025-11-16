@@ -1,5 +1,7 @@
+import os
 import yaml
 import json
+import torch
 from src import logger
 from pathlib import Path
 from box import ConfigBox
@@ -43,5 +45,15 @@ def load_json_data(json_path):
     with open(json_path, 'r') as f:
         return json.load(f)
 
-
-
+def seed_everything(seed: int = 42):
+    import random
+    import numpy as np
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    try:
+        import numpy as np  # noqa
+        np.random.seed(seed)
+    except Exception:
+        pass

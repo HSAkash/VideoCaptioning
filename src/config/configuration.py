@@ -1,4 +1,5 @@
 import os
+import torch
 from pyprojroot import here
 from src.utils.commons import read_yaml
 from src.constants import CONFIG_FILE_PATH, PARAM_FILE_PATH
@@ -7,6 +8,7 @@ from src.entity.config_entity import (
     UnzipDatasetConfig,
     ImageExtractionSplitConfig,
     AugmentationConfig,
+    VideoEncodingConfig,
 )
 
 
@@ -73,4 +75,25 @@ class ConfigurationManager:
             FRAMES_PER_VIDEO = self.params.FRAMES_PER_VIDEO,
             IMAGE_SIZE = self.params.IMAGE_SIZE,
             MAX_WORKERS = MAX_WORKERS
+        )
+    
+    def get_video_encoding_config(self) -> VideoEncodingConfig:
+        config = self.config.videoEncoding
+        
+        DEVICE = self.params.DEVICE if torch.cuda.is_available() else 'cpu'
+        # set MAX_WORKERS
+        cpu_cores = os.cpu_count() or 1
+        MAX_WORKERS = min(self.params.MAX_WORKERS, cpu_cores) or 1 # take which one minimum
+
+        return VideoEncodingConfig(
+            vit_name = config.vit_name,
+            source_root_dir = here(config.source_root_dir),
+            sub_folders = config.sub_folders,
+            destination_root_dir = here(config.destination_root_dir),
+            image_format = config.image_format,
+            FRAMES_PER_VIDEO = self.params.FRAMES_PER_VIDEO,
+            FRAMES_BATCH = self.params.videoEncoding.FRAMES_BATCH,
+            MAX_WORKERS = MAX_WORKERS,
+            DEVICE = DEVICE,
+            SEED = self.params.SEED
         )
