@@ -5,6 +5,7 @@ from src.pipeline.stage_03_ImageExtraction import ImageExtractionPipeline
 from src.pipeline.stage_04_augmentation import AugmentationPipeline
 from src.pipeline.stage_05_videoEncoding import VideoEncodingPipeline
 from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipeline
+from src.pipeline.stage_07_training import TrainingPipeline
 
 if __name__ == "__main__":
     
@@ -45,5 +46,11 @@ if __name__ == "__main__":
     STAGE_NAME = "Generate Dataset Label"
     logger.info(f">>> stage {STAGE_NAME} started")
     pipeline = GenerateDatasetLabelPipeline()
+    pipeline.run()
+    logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    STAGE_NAME = "Training"
+    logger.info(f">>> stage {STAGE_NAME} started")
+    pipeline = TrainingPipeline()
     pipeline.run()
     logger.info(f">>> stage {STAGE_NAME} completed.")

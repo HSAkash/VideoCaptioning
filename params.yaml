@@ -13,6 +13,10 @@ augmentation:
 videoEncoding:
   FRAMES_BATCH: 32
 
+training:
+  EPOCHS: 100
+  LR: 3e-5
+
 BATCH_SIZE: 4
 MAX_WORKERS: 2
 SEED: 42

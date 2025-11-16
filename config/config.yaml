@@ -50,3 +50,13 @@ generateDatasetLabel:
       source_json_path: dataset/msvd-captions/val.json
       video_data_dir: dataset/feature_dataset/val # after encodeing/ feature extraction path
   destination_root_dir: dataset/feature_dataset
+
+training:
+  vit_name: google/vit-base-patch16-224-in21k
+  gpt2_name: gpt2
+  # train_csv: dataset/feature_dataset/train.csv
+  train_csv: dataset/feature_dataset/val.csv
+  val_csv: dataset/feature_dataset/val.csv
+  checkpoint_dir: dataset/results/checkpoints
+  checkpoint_best_dir: dataset/results/checkpoints/best
+  checkpoint_training_dir: dataset/results/checkpoints/training

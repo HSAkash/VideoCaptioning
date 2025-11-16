@@ -10,6 +10,7 @@ from src.entity.config_entity import (
     AugmentationConfig,
     VideoEncodingConfig,
     GenerateDatasetLabelConfig,
+    TrainingConfig,
 )
 
 
@@ -113,4 +114,30 @@ class ConfigurationManager:
         return GenerateDatasetLabelConfig(
             dataset_details = dataset_details,
             destination_root_dir = here(config.destination_root_dir)
+        )
+    
+    def get_training_config(self) -> TrainingConfig:
+        config = self.config.training
+        params = self.params.training
+
+        DEVICE = self.params.DEVICE if torch.cuda.is_available() else 'cpu'
+        # set MAX_WORKERS
+        cpu_cores = os.cpu_count() or 1
+        MAX_WORKERS = min(self.params.MAX_WORKERS, cpu_cores) or 1 # take which one minimum
+
+        return TrainingConfig(
+            vit_name = config.vit_name,
+            gpt2_name = config.gpt2_name,
+            train_csv = here(config.train_csv),
+            val_csv = here(config.val_csv),
+            checkpoint_dir = here(config.checkpoint_dir),
+            checkpoint_best_dir = here(config.checkpoint_best_dir),
+            checkpoint_training_dir = here(config.checkpoint_training_dir),
+            FRAMES_PER_VIDEO = self.params.FRAMES_PER_VIDEO,
+            EPOCHS = params.EPOCHS,
+            LR = float(params.LR),
+            BATCH_SIZE = self.params.BATCH_SIZE,
+            MAX_WORKERS = MAX_WORKERS,
+            SEED = self.params.SEED,
+            DEVICE = DEVICE
         )

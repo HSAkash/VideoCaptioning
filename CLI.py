@@ -1,4 +1,5 @@
 import click
+from pathlib import Path
 from src import logger
 from src.pipeline.stage_01_download_dataset import DownloadDatasetPipeline
 from src.pipeline.stage_02_unzip_dataset import UnzipDatasetPipeline
@@ -6,6 +7,7 @@ from src.pipeline.stage_03_ImageExtraction import ImageExtractionPipeline
 from src.pipeline.stage_04_augmentation import AugmentationPipeline
 from src.pipeline.stage_05_videoEncoding import VideoEncodingPipeline
 from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipeline
+from src.pipeline.stage_07_training import TrainingPipeline
 
 @click.command()
 @click.option(
@@ -50,6 +52,31 @@ from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipel
     default=False, 
     help='Generate Dataset label'
 )
+@click.option(
+    '--training', 
+    is_flag=True, 
+    default=False, 
+    help='training'
+)
+@click.option(
+    '--train_csv',
+    type=click.Path(exists=True, dir_okay=True, file_okay=True),
+    default=None,
+    help='Training csv file Path(optional)'
+)
+@click.option(
+    '--val_csv',
+    type=click.Path(exists=True, dir_okay=True, file_okay=True),
+    default=None,
+    help='Validation csv file Path(optional)'
+)
+@click.option(
+    '--epochs',
+    type=int,
+    default=0,
+    help='epochs'
+)
+
 
 def main(
     download: bool,
@@ -58,7 +85,11 @@ def main(
     imex_resume: bool,
     augmentation: bool,
     video_encoding: bool,
-    generate_label: bool
+    generate_label: bool,
+    training: bool,
+    train_csv: Path,
+    val_csv: Path,
+    epochs: int
 ):
     # Download dataset
     if download:
@@ -107,6 +138,14 @@ def main(
         logger.info(f">>> stage {STAGE_NAME} started")
         pipeline = GenerateDatasetLabelPipeline()
         pipeline.run()
+        logger.info(f">>> stage {STAGE_NAME} completed.")
+    
+    # Training
+    if training:
+        STAGE_NAME = "Training"
+        logger.info(f">>> stage {STAGE_NAME} started")
+        pipeline = TrainingPipeline()
+        pipeline.run(train_csv, val_csv, epochs)
         logger.info(f">>> stage {STAGE_NAME} completed.")
 
 if __name__ == '__main__':

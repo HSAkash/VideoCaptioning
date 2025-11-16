@@ -1,7 +1,11 @@
+import os
 import gdown
+import torch
 import zipfile
 from tqdm import tqdm
 from pathlib import Path
+from dataclasses import asdict
+from src.config.training_config import TrainCfg
 from src.entity.config_entity import (
     DownloadDatasetConfig,
     UnzipDatasetConfig
@@ -39,6 +43,30 @@ def unzipDataset(config: UnzipDatasetConfig):
             # (Re)extract this file
             zip_ref.extract(file, extract_dir)
 
+def save_checkpoint(path_dir: str, model_enc, model_dec, tok, cfg: TrainCfg, epoch: int, history, optimizer, scheduler, scaler, best_val_loss):
+    os.makedirs(path_dir, exist_ok=True)
+    # tokenizer
+    tok.save_pretrained(os.path.join(path_dir, "tokenizer"))
+    ck = {
+        "epoch": epoch,
+        "cfg": asdict(cfg),
+        "model_dec": model_dec.state_dict(),
+        "model_enc_proj": model_enc.state_dict(),  # includes projector & PE, not ViT weights change (frozen)
+        "history": history,
+        "optimizer": optimizer.state_dict(),
+        "scheduler": scheduler.state_dict(),
+        "scaler": scaler.state_dict(),
+        "best_val_loss": best_val_loss
+    }
+    torch.save(ck, os.path.join(path_dir, "checkpoint.pt"))
+
+def load_checkpoint(path_dir: str, model_enc, model_dec):
+    ck = torch.load(os.path.join(path_dir, "checkpoint.pt"), map_location="cpu")
+    model_dec.load_state_dict(ck["model_dec"], strict=False)
+    model_enc.load_state_dict(ck["model_enc_proj"], strict=False)
+    return ck
+
+    
 
 if __name__ == "__main__":
     from src import logger

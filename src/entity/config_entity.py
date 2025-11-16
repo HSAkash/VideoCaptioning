@@ -58,3 +58,21 @@ class VideoEncodingConfig:
 class GenerateDatasetLabelConfig:
     dataset_details:                    list[tuple[str, Path, Path]] # label, source_json_path, video_data_dir
     destination_root_dir:               Path
+
+
+@dataclass
+class TrainingConfig:
+    vit_name:                           str
+    gpt2_name:                          str
+    train_csv:                          Path
+    val_csv:                            Path
+    checkpoint_dir:                     Path
+    checkpoint_best_dir:                Path
+    checkpoint_training_dir:            Path
+    FRAMES_PER_VIDEO:                   int
+    EPOCHS:                             int
+    LR:                                 float
+    BATCH_SIZE:                         int
+    MAX_WORKERS:                        int
+    SEED:                               int
+    DEVICE:                             str
