@@ -12,12 +12,14 @@ from PIL import Image
 from tqdm.auto import tqdm
 from src.utils.commons import seed_everything
 from transformers import AutoImageProcessor, ViTModel
+from src.entity.config_entity import VideoEncodingConfig
 from src.utils.interrupt_check import DelayedInterruptMainProcess
+
 
 class VideoEncoder:
     def __init__(
         self,
-        config
+        config: VideoEncodingConfig
     ):
         self.config = config
         seed_everything(seed=self.config.SEED)
