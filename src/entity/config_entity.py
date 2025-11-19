@@ -76,3 +76,14 @@ class TrainingConfig:
     MAX_WORKERS:                        int
     SEED:                               int
     DEVICE:                             str
+
+
+@dataclass
+class GenerateCaptionConfig:
+    vit_name:                           str
+    gpt2_name:                          str
+    checkpoint_path:                    Path
+    data_dirs:                          list[Path]
+    destination_dir:                    Path
+    FRAMES_PER_VIDEO:                   int
+    DEVICE:                             str

@@ -64,7 +64,8 @@ def load_checkpoint(path_dir: str, model_enc, model_dec):
     ck = torch.load(os.path.join(path_dir, "checkpoint.pt"), map_location="cpu")
     model_dec.load_state_dict(ck["model_dec"], strict=False)
     model_enc.load_state_dict(ck["model_enc_proj"], strict=False)
-    return ck
+
+    return ck, 
 
     
 

@@ -59,3 +59,13 @@ training:
   checkpoint_dir: dataset/results/checkpoints
   checkpoint_best_dir: dataset/results/checkpoints/best
   checkpoint_training_dir: dataset/results/checkpoints/training
+
+generateCaption:
+  vit_name: google/vit-base-patch16-224-in21k
+  gpt2_name: gpt2
+  checkpoint_path: dataset/GVLM_checkpoints/train_model
+  data_dirs:
+    - dataset/feature_dataset/val
+    - dataset/feature_dataset/test
+    - dataset/feature_dataset/train
+  destination_dir: dataset/generatCaption_local

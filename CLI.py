@@ -8,6 +8,7 @@ from src.pipeline.stage_04_augmentation import AugmentationPipeline
 from src.pipeline.stage_05_videoEncoding import VideoEncodingPipeline
 from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipeline
 from src.pipeline.stage_07_training import TrainingPipeline
+from src.pipeline.stage_08_generateCaption import GenerateCaptionPipeline
 
 @click.command()
 @click.option(
@@ -76,8 +77,36 @@ from src.pipeline.stage_07_training import TrainingPipeline
     default=0,
     help='epochs'
 )
-
-
+@click.option(
+    '--single_caption_generate', 
+    is_flag=True, 
+    default=False, 
+    help='Generate caption from file <video path/ image folder / feature path>'
+)
+@click.option(
+    '--multi_caption_generate', 
+    is_flag=True, 
+    default=False, 
+    help='Generate caption: root dir(train/val/test) folders. generte all file caption in one time.'
+)
+@click.option(
+    '--folder_path',
+    type=click.Path(exists=True, dir_okay=True, file_okay=True),
+    default=None,
+    help='Path of the root folder where all the feature or image file in there/ single file <video, feature path, image folder>'
+)
+@click.option(
+    '--model_path',
+    type=click.Path(exists=True, dir_okay=True),
+    default=None,
+    help='saved model path'
+)
+@click.option(
+    '--generated_text_save_dir',
+    type=click.Path(exists=False, dir_okay=True),
+    default=None,
+    help='All caption will be saved here.'
+)
 def main(
     download: bool,
     unzip: bool,
@@ -89,7 +118,12 @@ def main(
     training: bool,
     train_csv: Path,
     val_csv: Path,
-    epochs: int
+    epochs: int,
+    single_caption_generate: bool,
+    multi_caption_generate: bool,
+    folder_path: Path,
+    model_path: Path,
+    generated_text_save_dir: Path
 ):
     # Download dataset
     if download:
@@ -146,6 +180,21 @@ def main(
         logger.info(f">>> stage {STAGE_NAME} started")
         pipeline = TrainingPipeline()
         pipeline.run(train_csv, val_csv, epochs)
+        logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    # Single Caption generate
+    if single_caption_generate:
+        STAGE_NAME = "Generating Caption"
+        logger.info(f">>> stage {STAGE_NAME} started")
+        pipeline = GenerateCaptionPipeline()
+        pipeline.run(folder_path=folder_path,is_signle_path=True)
+        logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    if multi_caption_generate:
+        STAGE_NAME = "Generating Caption"
+        logger.info(f">>> stage {STAGE_NAME} started")
+        pipeline = GenerateCaptionPipeline()
+        pipeline.run(folder_path=folder_path, model_path=model_path, generated_text_save_dir_path=generated_text_save_dir)
         logger.info(f">>> stage {STAGE_NAME} completed.")
 
 if __name__ == '__main__':

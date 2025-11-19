@@ -11,6 +11,7 @@ from src.entity.config_entity import (
     VideoEncodingConfig,
     GenerateDatasetLabelConfig,
     TrainingConfig,
+    GenerateCaptionConfig,
 )
 
 
@@ -139,5 +140,21 @@ class ConfigurationManager:
             BATCH_SIZE = self.params.BATCH_SIZE,
             MAX_WORKERS = MAX_WORKERS,
             SEED = self.params.SEED,
+            DEVICE = DEVICE
+        )
+    
+    def get_generate_caption_config(self) -> GenerateCaptionConfig:
+        config = self.config.generateCaption
+
+        DEVICE = self.params.DEVICE if torch.cuda.is_available() else 'cpu'
+        data_dirs = [here(x) for x in config.data_dirs]
+        
+        return GenerateCaptionConfig(
+            vit_name = config.vit_name,
+            gpt2_name = config.gpt2_name,
+            checkpoint_path = here(config.checkpoint_path),
+            data_dirs = data_dirs,
+            destination_dir = here(config.destination_dir),
+            FRAMES_PER_VIDEO = self.params.FRAMES_PER_VIDEO,
             DEVICE = DEVICE
         )
