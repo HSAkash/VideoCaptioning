@@ -9,6 +9,7 @@ from src.pipeline.stage_05_videoEncoding import VideoEncodingPipeline
 from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipeline
 from src.pipeline.stage_07_training import TrainingPipeline
 from src.pipeline.stage_08_generateCaption import GenerateCaptionPipeline
+from src.pipeline.stage_09_refineGeneratedCaption import RefineGeneratedCaptionPipeline
 
 @click.command()
 @click.option(
@@ -78,22 +79,40 @@ from src.pipeline.stage_08_generateCaption import GenerateCaptionPipeline
     help='epochs'
 )
 @click.option(
-    '--single_caption_generate', 
+    '--generate', 
     is_flag=True, 
     default=False, 
-    help='Generate caption from file <video path/ image folder / feature path>'
+    help='Generate caption'
 )
 @click.option(
-    '--multi_caption_generate', 
+    '--refine', 
     is_flag=True, 
     default=False, 
-    help='Generate caption: root dir(train/val/test) folders. generte all file caption in one time.'
+    help='Generated text, rearrange the sentence.'
 )
 @click.option(
-    '--folder_path',
+    '--caption', 
+    type=click.STRING,
+    default=None, 
+    help='Single caption.'
+)
+@click.option(
+    '--folder', 
+    is_flag=True, 
+    default=False, 
+    help='Giver path is folder or single file. If true that mean multiple file folder else single file or single folder'
+)
+@click.option(
+    '--source',
     type=click.Path(exists=True, dir_okay=True, file_okay=True),
     default=None,
     help='Path of the root folder where all the feature or image file in there/ single file <video, feature path, image folder>'
+)
+@click.option(
+    '--destination',
+    type=click.Path(exists=False, dir_okay=True, file_okay=True),
+    default=None,
+    help='Where to save: <directory / file>'
 )
 @click.option(
     '--model_path',
@@ -102,10 +121,10 @@ from src.pipeline.stage_08_generateCaption import GenerateCaptionPipeline
     help='saved model path'
 )
 @click.option(
-    '--generated_text_save_dir',
-    type=click.Path(exists=False, dir_okay=True),
-    default=None,
-    help='All caption will be saved here.'
+    '--process_type',
+    type=click.STRING,
+    default='cloud', 
+    help='Will be use local deepseek or API of deepseek; valude: cloud/local'
 )
 def main(
     download: bool,
@@ -119,11 +138,14 @@ def main(
     train_csv: Path,
     val_csv: Path,
     epochs: int,
-    single_caption_generate: bool,
-    multi_caption_generate: bool,
-    folder_path: Path,
+    generate: bool,
+    refine: bool,
+    caption: str,
+    folder: bool,
+    source: Path,
+    destination: Path,
     model_path: Path,
-    generated_text_save_dir: Path
+    process_type: str
 ):
     # Download dataset
     if download:
@@ -182,19 +204,29 @@ def main(
         pipeline.run(train_csv, val_csv, epochs)
         logger.info(f">>> stage {STAGE_NAME} completed.")
 
-    # Single Caption generate
-    if single_caption_generate:
+    # Generating Caption
+    if generate:
         STAGE_NAME = "Generating Caption"
         logger.info(f">>> stage {STAGE_NAME} started")
         pipeline = GenerateCaptionPipeline()
-        pipeline.run(folder_path=folder_path,is_signle_path=True)
+        if folder:
+            pipeline.run(folder_path=source, model_path=model_path, generated_text_save_dir_path=destination)
+        # Single Caption generate
+        else:
+            pipeline.run(folder_path=source, model_path=model_path, generated_text_save_dir_path=destination, is_signle_path=True)
         logger.info(f">>> stage {STAGE_NAME} completed.")
 
-    if multi_caption_generate:
-        STAGE_NAME = "Generating Caption"
+    # Refine Sentence / Caption
+    if refine:
+        STAGE_NAME = "Refine the sentecne Caption"
         logger.info(f">>> stage {STAGE_NAME} started")
-        pipeline = GenerateCaptionPipeline()
-        pipeline.run(folder_path=folder_path, model_path=model_path, generated_text_save_dir_path=generated_text_save_dir)
+        pipeline = RefineGeneratedCaptionPipeline()
+        pipeline.run(
+            source=source,
+            destination=destination,
+            process_type=process_type,
+            caption = caption
+        )
         logger.info(f">>> stage {STAGE_NAME} completed.")
 
 if __name__ == '__main__':

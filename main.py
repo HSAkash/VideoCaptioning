@@ -7,6 +7,7 @@ from src.pipeline.stage_05_videoEncoding import VideoEncodingPipeline
 from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipeline
 from src.pipeline.stage_07_training import TrainingPipeline
 from src.pipeline.stage_08_generateCaption import GenerateCaptionPipeline
+from src.pipeline.stage_09_refineGeneratedCaption import RefineGeneratedCaptionPipeline
 
 if __name__ == "__main__":
     
@@ -59,5 +60,11 @@ if __name__ == "__main__":
     STAGE_NAME = "Generating Caption"
     logger.info(f">>> stage {STAGE_NAME} started")
     pipeline = GenerateCaptionPipeline()
+    pipeline.run()
+    logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    STAGE_NAME = "Refine the sentecne Caption"
+    logger.info(f">>> stage {STAGE_NAME} started")
+    pipeline = RefineGeneratedCaptionPipeline()
     pipeline.run()
     logger.info(f">>> stage {STAGE_NAME} completed.")

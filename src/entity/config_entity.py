@@ -87,3 +87,9 @@ class GenerateCaptionConfig:
     destination_dir:                    Path
     FRAMES_PER_VIDEO:                   int
     DEVICE:                             str
+
+
+@dataclass
+class RefineGeneratedCaptionConfig:
+    process_type:                       str
+    files_details:                      list[tuple[Path, Path]] # source, destination 

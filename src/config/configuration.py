@@ -12,6 +12,7 @@ from src.entity.config_entity import (
     GenerateDatasetLabelConfig,
     TrainingConfig,
     GenerateCaptionConfig,
+    RefineGeneratedCaptionConfig,
 )
 
 
@@ -157,4 +158,14 @@ class ConfigurationManager:
             destination_dir = here(config.destination_dir),
             FRAMES_PER_VIDEO = self.params.FRAMES_PER_VIDEO,
             DEVICE = DEVICE
+        )
+    
+    def get_refine_generated_caption_config(self) -> RefineGeneratedCaptionConfig:
+        config = self.config.refineGeneratedCaption
+
+        files_details = [(here(item['source']), here(item['destination'])) for item in config.files_details]
+        
+        return RefineGeneratedCaptionConfig(
+            process_type = config.process_type,
+            files_details = files_details
         )

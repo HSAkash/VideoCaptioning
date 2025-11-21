@@ -69,3 +69,11 @@ generateCaption:
     - dataset/feature_dataset/test
     - dataset/feature_dataset/train
   destination_dir: dataset/generatCaption_local
+
+refineGeneratedCaption:
+  process_type: cloud # cloud / local
+  files_details: # csv file
+    - source: dataset/generatCaption_local/val.csv
+      destination: dataset/generatCaption_local/refine/val.csv
+    - source: dataset/generatCaption_local/test.csv
+      destination: dataset/generatCaption_local/refine/test.csv
