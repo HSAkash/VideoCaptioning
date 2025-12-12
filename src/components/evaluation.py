@@ -138,7 +138,7 @@ class Evaluation:
             preds_batch = predictions[i:i+batch_size]
             refs_batch = references_list[i:i+batch_size]
 
-            P, R, F1 = scorer.score(preds_batch, refs_batch)
+            P, R, F1 = self.bert_scorer.score(preds_batch, refs_batch)
 
             all_P.append(P.cpu())
             all_R.append(R.cpu())
