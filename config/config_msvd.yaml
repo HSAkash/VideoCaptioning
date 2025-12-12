@@ -1,0 +1,127 @@
+downloadDataset:
+  video_url: https://www.kaggle.com/api/v1/datasets/download/sarthakjain004/msvd-clips
+  caption_urls:
+    - file_name: train.json
+      url: https://huggingface.co/datasets/friedrichor/MSVD/resolve/main/msvd_train.json?download=true
+    - file_name: test.json 
+      url: https://huggingface.co/datasets/friedrichor/MSVD/resolve/main/msvd_test.json?download=true
+    - file_name: val.json
+      url: https://huggingface.co/datasets/friedrichor/MSVD/resolve/main/msvd_val.json?download=true
+  video_output_path: dataset/msvd-clips.zip
+  caption_output_dir: dataset/msvd-captions
+
+unzipDataset:
+  zip_path: dataset/msvd-clips.zip
+  extract_dir: dataset/msvd-clips
+
+imageExtractionSplit:
+  video_source_dir: dataset/msvd-clips/YouTubeClips
+  caption_details:
+    - file_path: dataset/msvd-captions/train.json
+      label: train
+    - file_path: dataset/msvd-captions/test.json
+      label: test
+    - file_path: dataset/msvd-captions/val.json
+      label: val
+  image_destination_dir: dataset/msvd-images
+  image_format: jpg
+
+augmentation:
+  source_destination_dirs:
+    - [dataset/msvd-images/train, dataset/msvd-images/train]
+  image_format: jpg
+
+videoEncoding:
+  vit_name: "google/vit-base-patch16-224-in21k"
+  source_root_dir: dataset/msvd-images
+  sub_folders: ['train', 'test', 'val']
+  destination_root_dir: dataset/feature_dataset # dataset/feature_dataset
+  image_format: jpg
+
+generateDatasetLabel:
+  dataset_details:
+    - label: train
+      source_json_path: dataset/msvd-captions/train.json
+      video_data_dir: dataset/feature_dataset/train # after encodeing/ feature extraction path
+    - label: test
+      source_json_path: dataset/msvd-captions/test.json
+      video_data_dir: dataset/feature_dataset/test # after encodeing/ feature extraction path
+    - label: val
+      source_json_path: dataset/msvd-captions/val.json
+      video_data_dir: dataset/feature_dataset/val # after encodeing/ feature extraction path
+  destination_root_dir: dataset/feature_dataset
+
+training:
+  vit_name: google/vit-base-patch16-224-in21k
+  gpt2_name: gpt2
+  train_csv: dataset/feature_dataset/train.csv
+  val_csv: dataset/feature_dataset/val.csv
+  checkpoint_dir: dataset/results/checkpoints
+  checkpoint_best_dir: dataset/results/checkpoints/best
+  checkpoint_training_dir: dataset/results/checkpoints/training
+
+generateCaption:
+  vit_name: google/vit-base-patch16-224-in21k
+  gpt2_name: gpt2
+  checkpoint_path: dataset/GVLM_checkpoints/train_model
+  data_dirs:
+    - dataset/feature_dataset/val
+    - dataset/feature_dataset/test
+    - dataset/feature_dataset/train
+  destination_dir: dataset/generatCaption_local
+
+refineGeneratedCaption:
+  process_type: cloud # cloud / local
+  files_details: # csv file
+    - source: dataset/generatCaption_local/val.csv
+      destination: dataset/generatCaption_local/refine/val.csv
+    - source: dataset/generatCaption_local/test.csv
+      destination: dataset/generatCaption_local/refine/test.csv
+
+evaluation:
+  save_path: dataset/results/performance.csv
+  verbose: true
+  files_details:
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column]
+    - ["best" , "test","dataset/GVLM_checkpoints/best", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_best.json", "caption"]
+    - ["best" , "val","dataset/GVLM_checkpoints/best", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_best.json", "caption"]
+    - ["best" , "train","dataset/GVLM_checkpoints/best", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_best.json", "caption"]
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
+    - ["train_best_loss" , "test","dataset/GVLM_checkpoints/train_best_loss", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_train_best_loss.json", "caption"]
+    - ["train_best_loss" , "val","dataset/GVLM_checkpoints/train_best_loss", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_best_loss.json", "caption"]
+    - ["train_best_loss" , "train","dataset/GVLM_checkpoints/train_best_loss", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_best_loss.json", "caption"]
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
+    - ["train_best_loss_align" , "test","dataset/GVLM_checkpoints/train_best_loss_align", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_train_best_loss_align.json", "caption"]
+    - ["train_best_loss_align" , "val","dataset/GVLM_checkpoints/train_best_loss_align", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_best_loss_align.json", "caption"]
+    - ["train_best_loss_align" , "train","dataset/GVLM_checkpoints/train_best_loss_align", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_best_loss_align.json", "caption"]
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
+    - ["train_best_loss_text" , "test","dataset/GVLM_checkpoints/train_best_loss_text", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_train_best_loss_text.json", "caption"]
+    - ["train_best_loss_text" , "val","dataset/GVLM_checkpoints/train_best_loss_text", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_best_loss_text.json", "caption"]
+    - ["train_best_loss_text" , "train","dataset/GVLM_checkpoints/train_best_loss_text", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_best_loss_text.json", "caption"]
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
+    - ["train_model" , "test","dataset/GVLM_checkpoints/train_model", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_train_model.json", "caption"]
+    - ["train_model" , "val","dataset/GVLM_checkpoints/train_model", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_model.json", "caption"]
+    - ["train_model" , "train","dataset/GVLM_checkpoints/train_model", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_model.json", "caption"]
+    
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column]
+    - ["best" , "test","dataset/GVLM_checkpoints/best", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_best.json", "refine_caption"]
+    - ["best" , "val","dataset/GVLM_checkpoints/best", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_best.json", "refine_caption"]
+    - ["best" , "train","dataset/GVLM_checkpoints/best", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_best.json", "refine_caption"]
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
+    - ["train_best_loss" , "test","dataset/GVLM_checkpoints/train_best_loss", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_train_best_loss.json", "refine_caption"]
+    - ["train_best_loss" , "val","dataset/GVLM_checkpoints/train_best_loss", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_best_loss.json", "refine_caption"]
+    - ["train_best_loss" , "train","dataset/GVLM_checkpoints/train_best_loss", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_best_loss.json", "refine_caption"]
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
+    - ["train_best_loss_align" , "test","dataset/GVLM_checkpoints/train_best_loss_align", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_train_best_loss_align.json", "refine_caption"]
+    - ["train_best_loss_align" , "val","dataset/GVLM_checkpoints/train_best_loss_align", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_best_loss_align.json", "refine_caption"]
+    - ["train_best_loss_align" , "train","dataset/GVLM_checkpoints/train_best_loss_align", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_best_loss_align.json", "refine_caption"]
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
+    - ["train_best_loss_text" , "test","dataset/GVLM_checkpoints/train_best_loss_text", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_train_best_loss_text.json", "refine_caption"]
+    - ["train_best_loss_text" , "val","dataset/GVLM_checkpoints/train_best_loss_text", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_best_loss_text.json", "refine_caption"]
+    - ["train_best_loss_text" , "train","dataset/GVLM_checkpoints/train_best_loss_text", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_best_loss_text.json", "refine_caption"]
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
+    - ["train_model" , "test","dataset/GVLM_checkpoints/train_model", "dataset/msvd-captions/test.json", "caption", "dataset/refine_prediction/test_pred_train_model.json", "refine_caption"]
+    - ["train_model" , "val","dataset/GVLM_checkpoints/train_model", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_model.json", "refine_caption"]
+    - ["train_model" , "train","dataset/GVLM_checkpoints/train_model", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_model.json", "refine_caption"]
+
+

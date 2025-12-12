@@ -98,7 +98,7 @@ class CloudRefiner:
         if destination_json_file_path.exists():
             with open(destination_json_file_path, 'r') as file:
                 refine_data_dict = json.load(file)
-        batch_size = 5
+        batch_size = 20
         total_iterations = math.ceil(len(source_json_data)/ batch_size)
         already_done_batch_count = math.ceil(len(refine_data_dict['frame_dir']) / batch_size)
         with tqdm(total=total_iterations, desc="Processing data") as pbar: 

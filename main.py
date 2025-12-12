@@ -8,6 +8,7 @@ from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipel
 from src.pipeline.stage_07_training import TrainingPipeline
 from src.pipeline.stage_08_generateCaption import GenerateCaptionPipeline
 from src.pipeline.stage_09_refineGeneratedCaption import RefineGeneratedCaptionPipeline
+from src.pipeline.stage_10_evaluation import EvaluationPipeline
 
 if __name__ == "__main__":
     
@@ -66,5 +67,11 @@ if __name__ == "__main__":
     STAGE_NAME = "Refine the sentecne Caption"
     logger.info(f">>> stage {STAGE_NAME} started")
     pipeline = RefineGeneratedCaptionPipeline()
+    pipeline.run()
+    logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    STAGE_NAME = "Evaluation"
+    logger.info(f">>> stage {STAGE_NAME} started")
+    pipeline = EvaluationPipeline()
     pipeline.run()
     logger.info(f">>> stage {STAGE_NAME} completed.")

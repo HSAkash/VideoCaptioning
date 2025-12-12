@@ -93,3 +93,12 @@ class GenerateCaptionConfig:
 class RefineGeneratedCaptionConfig:
     process_type:                       str
     files_details:                      list[tuple[Path, Path]] # source, destination 
+
+
+@dataclass
+class EvaluationConfig:
+    save_path:                          str
+    # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column]
+    files_details:                      list[tuple[str, str, Path, Path, str, Path, str]] # source, destination
+    DEVICE:                             str
+    verbose:                            bool = True

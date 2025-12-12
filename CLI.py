@@ -10,6 +10,7 @@ from src.pipeline.stage_06_generateDatasetLabel import GenerateDatasetLabelPipel
 from src.pipeline.stage_07_training import TrainingPipeline
 from src.pipeline.stage_08_generateCaption import GenerateCaptionPipeline
 from src.pipeline.stage_09_refineGeneratedCaption import RefineGeneratedCaptionPipeline
+from src.pipeline.stage_10_evaluation import EvaluationPipeline
 
 @click.command()
 @click.option(
@@ -91,6 +92,12 @@ from src.pipeline.stage_09_refineGeneratedCaption import RefineGeneratedCaptionP
     help='Generated text, rearrange the sentence.'
 )
 @click.option(
+    '--evaluation', 
+    is_flag=True, 
+    default=False, 
+    help='Evaluate the model'
+)
+@click.option(
     '--caption', 
     type=click.STRING,
     default=None, 
@@ -106,7 +113,7 @@ from src.pipeline.stage_09_refineGeneratedCaption import RefineGeneratedCaptionP
     '--source',
     type=click.Path(exists=True, dir_okay=True, file_okay=True),
     default=None,
-    help='Path of the root folder where all the feature or image file in there/ single file <video, feature path, image folder>'
+    help='Path of the root folder where all the feature or image file in there/ single file <video, feature path, image folder> / in evaluation json path'
 )
 @click.option(
     '--destination',
@@ -126,6 +133,18 @@ from src.pipeline.stage_09_refineGeneratedCaption import RefineGeneratedCaptionP
     default='cloud', 
     help='Will be use local deepseek or API of deepseek; valude: cloud/local'
 )
+@click.option(
+    '--reference_column',
+    type=click.STRING,
+    default=None, 
+    help='Ground Truth caption columns'
+)
+@click.option(
+    '--generated_column',
+    type=click.STRING,
+    default=None, 
+    help='Which columns we will compare with ground Truth columns (caption columns)'
+)
 def main(
     download: bool,
     unzip: bool,
@@ -140,12 +159,15 @@ def main(
     epochs: int,
     generate: bool,
     refine: bool,
+    evaluation: bool,
     caption: str,
     folder: bool,
     source: Path,
     destination: Path,
     model_path: Path,
-    process_type: str
+    process_type: str,
+    reference_column: str,
+    generated_column: str
 ):
     # Download dataset
     if download:
@@ -226,6 +248,21 @@ def main(
             destination=destination,
             process_type=process_type,
             caption = caption
+        )
+        logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    # Evaluation
+    if evaluation:
+        STAGE_NAME = "Evaluation"
+        logger.info(f">>> stage {STAGE_NAME} started")
+        pipeline = EvaluationPipeline()
+        pipeline.run(
+            model_path = model_path,
+            reference_json_path = train_csv or val_csv,
+            reference_column =reference_column,
+            generated_json_path = source,
+            generated_column =generated_column,
+            save_path = destination
         )
         logger.info(f">>> stage {STAGE_NAME} completed.")
 

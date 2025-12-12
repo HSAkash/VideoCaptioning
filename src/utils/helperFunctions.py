@@ -1,4 +1,5 @@
 import os
+import errno
 import gdown
 import torch
 import zipfile
@@ -6,10 +7,22 @@ from tqdm import tqdm
 from pathlib import Path
 from dataclasses import asdict
 from src.config.training_config import TrainCfg
+from src.utils.commons import load_json_data, save_json_data
 from src.entity.config_entity import (
     DownloadDatasetConfig,
     UnzipDatasetConfig
 )
+
+def caption_str_to_list(json_path:Path, col:str='caption'):
+    if not json_path.exists():
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), json_path)
+
+    json_data = load_json_data(json_path)
+    for idx in range(len(json_data)):
+        if isinstance(json_data[idx][col], str):
+            json_data[idx][col] = [json_data[idx][col]]
+    save_json_data(json_data, json_path)
+
 
 def downloadDataset(config: DownloadDatasetConfig):
     # Video download
@@ -24,6 +37,7 @@ def downloadDataset(config: DownloadDatasetConfig):
         file_name, url = item.file_name, item.url
         output_path = caption_output_dir / file_name
         gdown.download(url=url, output=output_path.__str__(), resume=True)
+        caption_str_to_list(output_path)
 
 def unzipDataset(config: UnzipDatasetConfig):
     extract_dir = config.extract_dir
@@ -87,4 +101,3 @@ if __name__ == "__main__":
     unzip_dataset_config = configurationManager.get_unzip_dataset_config()
     unzipDataset(unzip_dataset_config)
     logger.info(f">>> stage {STAGE_NAME} completed and save it to: {unzip_dataset_config.extract_dir}")
-

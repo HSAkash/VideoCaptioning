@@ -13,6 +13,7 @@ from src.entity.config_entity import (
     TrainingConfig,
     GenerateCaptionConfig,
     RefineGeneratedCaptionConfig,
+    EvaluationConfig,
 )
 
 
@@ -168,4 +169,30 @@ class ConfigurationManager:
         return RefineGeneratedCaptionConfig(
             process_type = config.process_type,
             files_details = files_details
+        )
+    
+    def get_evaluation_config(self) -> EvaluationConfig:
+        config = self.config.evaluation
+
+        files_details = [
+            # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column]
+            (
+                item[0], # model_label
+                item[1], # dataset_label
+                here(item[2]), # model_path
+                here(item[3]), # reference_json_path
+                item[4], # reference_column
+                here(item[5]), # relatum_json_path
+                item[6], # relatum_column
+            )
+            
+            for item in config.files_details]
+
+        DEVICE = self.params.DEVICE if torch.cuda.is_available() else 'cpu'
+        
+        return EvaluationConfig(
+            save_path = here(config.save_path),
+            files_details = files_details,
+            DEVICE = DEVICE,
+            verbose = config.verbose
         )

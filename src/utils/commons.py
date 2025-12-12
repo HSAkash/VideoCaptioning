@@ -44,6 +44,10 @@ def read_yaml(file_path: Path) -> ConfigBox:
 def load_json_data(json_path):
     with open(json_path, 'r') as f:
         return json.load(f)
+    
+def save_json_data(json_data, json_path):
+    with open(json_path, 'w') as f:
+        f.write(json.dumps(json_data, indent=4))
 
 def seed_everything(seed: int = 42):
     import random
