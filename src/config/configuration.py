@@ -14,6 +14,7 @@ from src.entity.config_entity import (
     GenerateCaptionConfig,
     RefineGeneratedCaptionConfig,
     EvaluationConfig,
+    PlotHistoryConfig
 )
 
 
@@ -195,4 +196,19 @@ class ConfigurationManager:
             files_details = files_details,
             DEVICE = DEVICE,
             verbose = config.verbose
+        )
+    
+    def get_plot_history_config(self) -> PlotHistoryConfig:
+        config = self.config.plotHistory
+
+        DEVICE = self.params.DEVICE if torch.cuda.is_available() else 'cpu'
+
+        return PlotHistoryConfig(
+            destination_dir = here(config.destination_dir),
+            model_path = here(config.model_path),
+            history_path = here(config.history_path),
+            vit_name = config.vit_name,
+            gpt2_name = config.gpt2_name,
+            FRAMES_PER_VIDEO = self.params.FRAMES_PER_VIDEO,
+            DEVICE = DEVICE
         )

@@ -56,7 +56,7 @@ training:
 generateCaption:
   vit_name: google/vit-base-patch16-224-in21k
   gpt2_name: gpt2
-  checkpoint_path: dataset/MSR-VTT/GVLM_checkpoints/train_model
+  checkpoint_path: dataset/MSR-VTT/MSRVTT_checkpoints/train_model
   data_dirs:
     - dataset/MSR-VTT/feature_dataset/val
     - dataset/MSR-VTT/feature_dataset/test
@@ -134,4 +134,12 @@ evaluation:
     # [model_label, dataset_label,model_path, reference_json_path, reference_column, relatum_json_path, relatum_column, ]
     - ["train_model" , "test","dataset/MSR-VTT/checkpoints/train_model", "dataset/MSR-VTT/MSRVTT-captions/test.json", "caption", "dataset/MSR-VTT/refine/test_pred_train_model.json", "refine_caption"]
     - ["train_model" , "train","dataset/MSR-VTT/checkpoints/train_model", "dataset/MSR-VTT/MSRVTT-captions/train.json", "caption", "dataset/MSR-VTT/refine/train_pred_train_model.json", "refine_caption"]
-    
+
+plotHistory:
+  destination_dir: dataset/MSR-VTT/results/plots
+  model_path: dataset/MSR-VTT/MSRVTT_checkpoints/train_model
+  history_path: dataset/MSR-VTT/results/history.csv
+  vit_name: google/vit-base-patch16-224-in21k
+  gpt2_name: gpt2
+
+

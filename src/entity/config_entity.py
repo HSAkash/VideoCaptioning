@@ -102,3 +102,14 @@ class EvaluationConfig:
     files_details:                      list[tuple[str, str, Path, Path, str, Path, str]] # source, destination
     DEVICE:                             str
     verbose:                            bool = True
+
+
+@dataclass
+class PlotHistoryConfig:
+    destination_dir:                    Path
+    model_path:                         Path
+    history_path:                       Path
+    vit_name:                           str
+    gpt2_name:                          str
+    FRAMES_PER_VIDEO:                   int
+    DEVICE:                             str

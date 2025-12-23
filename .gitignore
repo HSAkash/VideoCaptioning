@@ -209,3 +209,4 @@ __marimo__/
 # my ignore
 dataset/
 notebook/
+.gradio/

@@ -124,4 +124,9 @@ evaluation:
     - ["train_model" , "val","dataset/GVLM_checkpoints/train_model", "dataset/msvd-captions/val.json", "caption", "dataset/refine_prediction/val_pred_train_model.json", "refine_caption"]
     - ["train_model" , "train","dataset/GVLM_checkpoints/train_model", "dataset/msvd-captions/train.json", "caption", "dataset/refine_prediction/train_pred_train_model.json", "refine_caption"]
 
-
+plotHistory:
+  destination_dir: dataset/MSVD/results/plots
+  model_path: dataset/MSVD/GVLM_checkpoints/train_model
+  history_path: dataset/MSVD/results/history.csv
+  vit_name: google/vit-base-patch16-224-in21k
+  gpt2_name: gpt2

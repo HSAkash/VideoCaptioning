@@ -11,6 +11,7 @@ from src.pipeline.stage_07_training import TrainingPipeline
 from src.pipeline.stage_08_generateCaption import GenerateCaptionPipeline
 from src.pipeline.stage_09_refineGeneratedCaption import RefineGeneratedCaptionPipeline
 from src.pipeline.stage_10_evaluation import EvaluationPipeline
+from src.pipeline.stage_11_plotHistory import PlotHistoryPipeline
 
 @click.command()
 @click.option(
@@ -98,6 +99,12 @@ from src.pipeline.stage_10_evaluation import EvaluationPipeline
     help='Evaluate the model'
 )
 @click.option(
+    '--plot', 
+    is_flag=True, 
+    default=False, 
+    help='Plot history'
+)
+@click.option(
     '--caption', 
     type=click.STRING,
     default=None, 
@@ -145,6 +152,12 @@ from src.pipeline.stage_10_evaluation import EvaluationPipeline
     default=None, 
     help='Which columns we will compare with ground Truth columns (caption columns)'
 )
+@click.option(
+    '--history_path',
+    type=click.Path(exists=True, dir_okay=True),
+    default=None,
+    help='where model training history is saved'
+)
 def main(
     download: bool,
     unzip: bool,
@@ -167,7 +180,9 @@ def main(
     model_path: Path,
     process_type: str,
     reference_column: str,
-    generated_column: str
+    generated_column: str,
+    plot: bool,
+    history_path: Path
 ):
     # Download dataset
     if download:
@@ -264,6 +279,14 @@ def main(
             generated_column =generated_column,
             save_path = destination
         )
+        logger.info(f">>> stage {STAGE_NAME} completed.")
+
+    # Plot history
+    if plot:
+        STAGE_NAME = "Plot history"
+        logger.info(f">>> stage {STAGE_NAME} started")
+        pipeline = PlotHistoryPipeline()
+        pipeline.run(history_path=history_path)
         logger.info(f">>> stage {STAGE_NAME} completed.")
 
 if __name__ == '__main__':

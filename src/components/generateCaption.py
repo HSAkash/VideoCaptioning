@@ -58,6 +58,31 @@ class GenerateCaption:
             raise FileNotFoundError(f"The model file '{self.config.checkpoint_path}' was not found.")
 
 
+    # @torch.no_grad()
+    # def generate_caption(self, pixel_values, precomp_feat, prompt: str = ""):
+    #     if pixel_values is not None: pixel_values = pixel_values.to(self.config.DEVICE)
+    #     if precomp_feat is not None: precomp_feat = precomp_feat.to(self.config.DEVICE)
+    #     video_tokens = self.model_enc(pixel_values, precomp_feat)
+
+    #     # Build prompt ids (can be empty)
+    #     if prompt == "":
+    #         prompt = ""
+    #     input_ids = self.tok.encode(prompt, return_tensors="pt").to(self.config.DEVICE)
+
+    #     gen_ids = self.model_dec.lm.generate(
+    #         input_ids=input_ids,
+    #         max_new_tokens=self.cfg.max_gen_len,
+    #         num_beams=self.cfg.num_beams,
+    #         do_sample=self.cfg.do_sample,
+    #         encoder_hidden_states=video_tokens,
+    #         encoder_attention_mask=self.vid_mask,
+    #         eos_token_id=self.tok.eos_token_id,
+    #         pad_token_id=self.tok.pad_token_id
+    #     )
+    #     out = self.tok.decode(gen_ids[0], skip_special_tokens=True)
+    #     # strip the prompt
+    #     return out[len(prompt):].strip()
+
     @torch.no_grad()
     def generate_caption(self, pixel_values, precomp_feat, prompt: str = ""):
         if pixel_values is not None: pixel_values = pixel_values.to(self.config.DEVICE)
@@ -73,15 +98,21 @@ class GenerateCaption:
             input_ids=input_ids,
             max_new_tokens=self.cfg.max_gen_len,
             num_beams=self.cfg.num_beams,
-            do_sample=self.cfg.do_sample,
+            do_sample=False,  # deterministic output
+            repetition_penalty=1.2,       # prevent loops
+            length_penalty=1.0,           # balance short/long
+            early_stopping=True,          # stop when EOS reached
             encoder_hidden_states=video_tokens,
             encoder_attention_mask=self.vid_mask,
             eos_token_id=self.tok.eos_token_id,
             pad_token_id=self.tok.pad_token_id
         )
         out = self.tok.decode(gen_ids[0], skip_special_tokens=True)
-        # strip the prompt
         return out[len(prompt):].strip()
+
+
+
+
     
     def generate(self, file_path: Path, model_path: Path=None):
         """
