@@ -146,10 +146,10 @@ python app.py
 
 Experiments were conducted using two benchmark datasets.
 
-| Dataset | Description |
-|----------|-------------|
-| MSVD | Microsoft Research Video Description Dataset |
-| MSR-VTT | Large-scale open-domain video captioning dataset |
+| Dataset     | Description |
+|-------------|-------------|
+| [MSVD](https://huggingface.co/datasets/friedrichor/MSVD)    | Microsoft Research Video Description Dataset |
+| [MSR-VTT](https://huggingface.co/datasets/friedrichor/MSR-VTT) | Large-scale open-domain video captioning dataset |
 
 Please download the datasets from their official sources before training.
 
@@ -278,4 +278,4 @@ This work builds upon several outstanding open-source projects, including PyTorc
 
 # License
 
-This project is released under the MIT License.
+This project is released under the Apache-2.0 License.
