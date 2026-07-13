@@ -43,7 +43,14 @@ class GenerateCaption:
         self.tok = AutoTokenizer.from_pretrained(self.config.checkpoint_path / "tokenizer")
 
         # models
-        self.model_enc = VideoEncoder(self.cfg.vit_name, self.cfg.d_model, self.cfg.proj_hidden, self.cfg.dropout).to(self.config.DEVICE)
+        self.model_enc = VideoEncoder(
+            self.cfg.vit_name,
+            self.cfg.d_model,
+            self.cfg.proj_hidden,
+            self.cfg.dropout,
+            self.cfg.temporal_layers,
+            self.cfg.temporal_heads,
+        ).to(self.config.DEVICE)
         self.model_dec = CrossModalCaptioner(self.cfg.gpt2_name, self.cfg.d_model, self.cfg.dropout).to(self.config.DEVICE)
 
         # >>> CRITICAL: resize embeddings to match tokenizer <<<
@@ -91,7 +98,7 @@ class GenerateCaption:
 
         # Build prompt ids (can be empty)
         if prompt == "":
-            prompt = ""
+            prompt = self.cfg.caption_prefix
         input_ids = self.tok.encode(prompt, return_tensors="pt").to(self.config.DEVICE)
 
         gen_ids = self.model_dec.lm.generate(
@@ -127,8 +134,8 @@ class GenerateCaption:
                 generated text
         """
         if model_path:
-            self.load_models()
             self.config.checkpoint_path = here(model_path)
+            self.load_models()
         if isinstance(file_path, str):
             file_path = Path(file_path)
 
@@ -150,7 +157,7 @@ class GenerateCaption:
             batch = self.iproc(images=imgs, return_tensors="pt")
             pixel_value = batch["pixel_values"].to(self.config.DEVICE)  # [B,C,H,W]
 
-        caption = self.generate_caption(pixel_value, feat, prompt="caption: ")
+        caption = self.generate_caption(pixel_value, feat, prompt=self.cfg.caption_prefix)
 
         return caption
             

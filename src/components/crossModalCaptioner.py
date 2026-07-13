@@ -12,22 +12,17 @@ class CrossModalCaptioner(nn.Module):
     """GPT2 decoder with cross-attention over video tokens + contrastive head"""
     def __init__(self, gpt2_name: str, d_model: int, dropout: float):
         super().__init__()
-        # Re-init GPT2 with cross-attention
+        # Load pretrained GPT-2 weights and only randomly initialize cross-attention.
         base_cfg = GPT2Config.from_pretrained(gpt2_name)
-        cfg = GPT2Config(
-            vocab_size=base_cfg.vocab_size,
-            n_embd=base_cfg.n_embd,
-            n_layer=base_cfg.n_layer,
-            n_head=base_cfg.n_head,
-            n_positions=base_cfg.n_positions,
-            n_ctx=base_cfg.n_ctx,
-            add_cross_attention=True,
-            resid_pdrop=dropout,
-            embd_pdrop=dropout,
-            attn_pdrop=dropout
-        )
-        self.lm = GPT2LMHeadModel(cfg)
-        self.lm.resize_token_embeddings(base_cfg.vocab_size)
+        cfg_dict = base_cfg.to_dict()
+        cfg_dict.update({
+            "add_cross_attention": True,
+            "resid_pdrop": dropout,
+            "embd_pdrop": dropout,
+            "attn_pdrop": dropout,
+        })
+        cfg = GPT2Config.from_dict(cfg_dict)
+        self.lm = GPT2LMHeadModel.from_pretrained(gpt2_name, config=cfg)
         assert d_model == cfg.n_embd, f"d_model={d_model} must match GPT2 hidden size {cfg.n_embd}"
 
         # Projection heads for alignment (video/text -> common space)

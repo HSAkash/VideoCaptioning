@@ -65,7 +65,7 @@ def save_checkpoint(path_dir: str, model_enc, model_dec, tok, cfg: TrainCfg, epo
         "epoch": epoch,
         "cfg": asdict(cfg),
         "model_dec": model_dec.state_dict(),
-        "model_enc_proj": model_enc.state_dict(),  # includes projector & PE, not ViT weights change (frozen)
+        "model_enc_proj": model_enc.state_dict(),  # includes projector, PE, and temporal encoder; ViT is frozen
         "history": history,
         "optimizer": optimizer.state_dict(),
         "scheduler": scheduler.state_dict(),

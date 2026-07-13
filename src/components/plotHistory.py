@@ -24,7 +24,14 @@ class PlotHistory:
         self.tok = AutoTokenizer.from_pretrained(self.config.model_path / "tokenizer")
 
         # models
-        self.model_enc = VideoEncoder(self.cfg.vit_name, self.cfg.d_model, self.cfg.proj_hidden, self.cfg.dropout).to(self.config.DEVICE)
+        self.model_enc = VideoEncoder(
+            self.cfg.vit_name,
+            self.cfg.d_model,
+            self.cfg.proj_hidden,
+            self.cfg.dropout,
+            self.cfg.temporal_layers,
+            self.cfg.temporal_heads,
+        ).to(self.config.DEVICE)
         self.model_dec = CrossModalCaptioner(self.cfg.gpt2_name, self.cfg.d_model, self.cfg.dropout).to(self.config.DEVICE)
 
         # >>> CRITICAL: resize embeddings to match tokenizer <<<
