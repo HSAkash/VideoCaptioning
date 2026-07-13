@@ -13,8 +13,8 @@ The framework is designed to be modular, allowing different datasets, visual enc
 ---
 # Demo
 A demonstration video of the complete caption generation pipeline is available in:
-
 https://github.com/user-attachments/assets/0c7aa6a5-7928-4bc8-9eea-3afa214217a1
+
 ---
 
 # Framework Pipeline
