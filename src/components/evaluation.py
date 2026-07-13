@@ -4,6 +4,7 @@ from src.utils.interrupt_check import DelayedInterruptMainProcess
 
 import torch
 from pycocoevalcap.cider.cider import Cider
+from pycocoevalcap.spice.spice import Spice
 import nltk
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from rouge_score import rouge_scorer
@@ -28,11 +29,18 @@ class Evaluation:
     def __init__(self, config: EvaluationConfig):
         self.config = config
         self.cider_scorer = Cider()
+        self.spice_scorer = Spice()
         self.bert_scorer = BERTScorer(
             lang="en",
             model_type="roberta-large",
             device=self.config.DEVICE
         )
+
+    @staticmethod
+    def is_valid_caption(caption) -> bool:
+        if not isinstance(caption, str):
+            return False
+        return bool(caption.strip())
 
     def calculate_bleu(self, predictions, references_list):
         """Calculate BLEU scores"""
@@ -43,6 +51,9 @@ class Evaluation:
 
         with tqdm(total=len(references_list), desc="Bleu Score") as pbar:
             for pred, refs in zip(predictions, references_list):
+                if not self.is_valid_caption(pred):
+                    pbar.update(1)
+                    continue
                 pred_tokens = pred.split()
                 refs_tokens = [ref.split() for ref in refs]
                 score = sentence_bleu(refs_tokens, pred_tokens, 
@@ -67,6 +78,9 @@ class Evaluation:
         
         with tqdm(total=len(references_list), desc="ROUGE-L Score") as pbar:
             for pred, refs in zip(predictions, references_list):
+                if not self.is_valid_caption(pred):
+                    pbar.update(1)
+                    continue
                 best_score = 0
                 for ref in refs:
                     scores = scorer.score(ref, pred)
@@ -90,6 +104,9 @@ class Evaluation:
         
         with tqdm(total=len(references_list), desc="METEOR Score") as pbar:
             for pred, refs in zip(predictions, references_list):
+                if not self.is_valid_caption(pred):
+                    pbar.update(1)
+                    continue
                 pred_tokens = pred.split()
                 refs_tokens = [ref.split() for ref in refs]
                 best_score = 0
@@ -118,8 +135,13 @@ class Evaluation:
         res = {}
         
         for i, (pred, refs) in enumerate(zip(predictions, references_list)):
+            if not self.is_valid_caption(pred):
+                continue
             gts[i] = refs
             res[i] = [pred]
+
+        if not res:
+            return 0.0
 
         score, _ = self.cider_scorer.compute_score(gts, res)
 
@@ -127,6 +149,42 @@ class Evaluation:
             logger.info(f">>> CIDEr Score: {score}")
 
         return score
+
+    def calculate_spice(self, predictions, references_list, batch_size=500):
+        """Calculate SPICE scores."""
+        if self.config.verbose:
+            logger.info(f">>> Calculating SPICE Score")
+
+        total_score = 0.0
+        total_count = 0
+
+        with tqdm(total=len(references_list), desc="SPICE Score") as pbar:
+            for start_idx in range(0, len(predictions), batch_size):
+                preds_batch = predictions[start_idx:start_idx + batch_size]
+                refs_batch = references_list[start_idx:start_idx + batch_size]
+                batch_pairs = [
+                    (pred, refs)
+                    for pred, refs in zip(preds_batch, refs_batch)
+                    if self.is_valid_caption(pred)
+                ]
+
+                if not batch_pairs:
+                    pbar.update(len(preds_batch))
+                    continue
+
+                gts = {str(i): refs for i, (_, refs) in enumerate(batch_pairs)}
+                res = {str(i): [pred] for i, (pred, _) in enumerate(batch_pairs)}
+
+                score, _ = self.spice_scorer.compute_score(gts, res)
+                total_score += score * len(batch_pairs)
+                total_count += len(batch_pairs)
+                pbar.update(len(preds_batch))
+
+        sp_score = total_score / total_count if total_count else 0.0
+        if self.config.verbose:
+            logger.info(f">>> SPICE Score: {sp_score}")
+
+        return sp_score
 
     def calculate_bert_score(self, predictions, references_list, batch_size = 256):
         """Calculate Bert scores """
@@ -162,8 +220,11 @@ class Evaluation:
 
         for item in pred_json_data:
             video_id = item['video_id']
+            pred = item.get(pred_col, None)
+            if not self.is_valid_caption(pred):
+                continue
             if ref_dict.get(video_id, None):
-                predictions.append(item[pred_col])
+                predictions.append(pred.strip())
                 references_list.append(ref_dict[video_id])
 
         return references_list, predictions
@@ -269,6 +330,14 @@ class Evaluation:
             if not current_item.get("cider_score", None):
                 ci_score = self.calculate_cider(predictions, references_list)
                 current_item['cider_score'] = float(ci_score)
+                results[idx] = current_item
+
+                with DelayedInterruptMainProcess():
+                    save_json_data(results, save_json_path)
+
+            if "spice_score" not in current_item:
+                sp_score = self.calculate_spice(predictions, references_list)
+                current_item['spice_score'] = float(sp_score)
                 results[idx] = current_item
 
                 with DelayedInterruptMainProcess():

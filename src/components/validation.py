@@ -5,6 +5,7 @@ from src.utils.loss_fn import align_loss_from_embeddings
 
 @torch.no_grad()
 def validate(model_enc, model_dec, dl, tok, cfg: TrainCfg):
+    model_enc.eval()
     model_dec.eval()
     device = cfg.device
     losses, losses_txt, losses_align = [], [], []

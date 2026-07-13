@@ -6,11 +6,21 @@ from typing import Optional
 
 
 class VideoEncoder(nn.Module):
-    """ViT per-frame encoder -> CLS -> projection to d_model with temporal pos enc"""
-    def __init__(self, vit_name: str, d_model: int, proj_hidden: int, dropout: float):
+    """ViT per-frame encoder -> CLS -> projection -> temporal transformer."""
+    def __init__(
+        self,
+        vit_name: str,
+        d_model: int,
+        proj_hidden: int,
+        dropout: float,
+        temporal_layers: int = 1,
+        temporal_heads: int = 8,
+    ):
         super().__init__()
         self.vit = ViTModel.from_pretrained(vit_name)
         self.vit.eval()  # keep in eval; we won't fine-tune by default (can unfreeze later)
+        for p in self.vit.parameters():
+            p.requires_grad = False
         self.vit_hidden = self.vit.config.hidden_size  # e.g., 768
         self.proj = nn.Sequential(
             nn.LayerNorm(self.vit_hidden),
@@ -20,7 +30,26 @@ class VideoEncoder(nn.Module):
             nn.Linear(proj_hidden, d_model),
         )
         self.temporal_pe = nn.Parameter(torch.zeros(512, d_model))  # max T=512
+        temporal_block = nn.TransformerEncoderLayer(
+            d_model=d_model,
+            nhead=temporal_heads,
+            dim_feedforward=d_model * 4,
+            dropout=dropout,
+            activation="gelu",
+            batch_first=True,
+            norm_first=True,
+        )
+        self.temporal_encoder = nn.TransformerEncoder(
+            temporal_block,
+            num_layers=temporal_layers,
+        )
+        self.out_norm = nn.LayerNorm(d_model)
         nn.init.trunc_normal_(self.temporal_pe, std=0.02)
+
+    def train(self, mode: bool = True):
+        super().train(mode)
+        self.vit.eval()
+        return self
 
     @torch.no_grad()
     def encode_frames(self, pixel_values: torch.Tensor) -> torch.Tensor:
@@ -48,4 +77,6 @@ class VideoEncoder(nn.Module):
         B, T, D = vid.shape
         vid_proj = self.proj(vid)  # [B,T,d_model]
         pe = self.temporal_pe[:T].unsqueeze(0)  # [1,T,d_model]
-        return vid_proj + pe  # [B,T,d_model]
+        vid_proj = vid_proj + pe
+        vid_proj = self.temporal_encoder(vid_proj)
+        return self.out_norm(vid_proj)  # [B,T,d_model]

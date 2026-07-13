@@ -40,7 +40,11 @@ class Training:
         )
 
         # --- single tokenizer (build first) ---
-        self.btok = BatchTokenizer(self.cfg.gpt2_name, self.cfg.max_txt_len)
+        self.btok = BatchTokenizer(
+            self.cfg.gpt2_name,
+            self.cfg.max_txt_len,
+            self.cfg.caption_prefix,
+        )
         self.tok = self.btok.tok  # use this everywhere
         # image processor matches ViT pretraining
         self.iproc = AutoImageProcessor.from_pretrained(self.cfg.vit_name)
@@ -56,7 +60,14 @@ class Training:
                         num_workers=self.cfg.num_workers, collate_fn=lambda s: collate_fn(s, self.btok))
         
         # models
-        self.model_enc = VideoEncoder(self.cfg.vit_name, self.cfg.d_model, self.cfg.proj_hidden, self.cfg.dropout).to(self.config.DEVICE)
+        self.model_enc = VideoEncoder(
+            self.cfg.vit_name,
+            self.cfg.d_model,
+            self.cfg.proj_hidden,
+            self.cfg.dropout,
+            self.cfg.temporal_layers,
+            self.cfg.temporal_heads,
+        ).to(self.config.DEVICE)
         self.model_dec = CrossModalCaptioner(self.cfg.gpt2_name, self.cfg.d_model, self.cfg.dropout).to(self.config.DEVICE)
 
         # >>> CRITICAL: resize embeddings to match tokenizer <<<
@@ -97,6 +108,7 @@ class Training:
 
     def train_one_epoch(self, epoch: int):
         self.model_dec.train()
+        self.model_enc.train()
         if epoch < self.cfg.freeze_lm_epochs:
             for p in self.model_dec.lm.parameters(): p.requires_grad = False
         else:
@@ -105,6 +117,7 @@ class Training:
         device = self.cfg.device
         total_txt, total_align = 0.0, 0.0
         total, nstep = 0.0, 0
+        grad_params = [p for group in self.optimizer.param_groups for p in group["params"] if p.requires_grad]
 
         max_lambda = self.cfg.lambda_align
         cur_lambda = max_lambda * min(1.0, epoch / max(1, self.cfg.align_warm_epochs))
@@ -166,12 +179,13 @@ class Training:
             self.optimizer.zero_grad(set_to_none=True)
             if self.cfg.amp and self.scaler is not None:
                 self.scaler.scale(loss).backward()
-                torch.nn.utils.clip_grad_norm_(self.model_dec.parameters(), self.cfg.grad_clip)
+                self.scaler.unscale_(self.optimizer)
+                torch.nn.utils.clip_grad_norm_(grad_params, self.cfg.grad_clip)
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
             else:
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(self.model_dec.parameters(), self.cfg.grad_clip)
+                torch.nn.utils.clip_grad_norm_(grad_params, self.cfg.grad_clip)
                 self.optimizer.step()
             if self.scheduler: self.scheduler.step()
 
