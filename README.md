@@ -1,4 +1,5 @@
 # Compact Video Language Model (VLM) for Video Captioning
+[![DOI](https://zenodo.org/badge/1299957295.svg)](https://doi.org/10.5281/zenodo.21349376)
 
 > A compact and practical Video Language Model (VLM) for automatic video captioning using a Vision Transformer (ViT) encoder and a GPT-2 language decoder, with optional LLM-based caption refinement.
 
